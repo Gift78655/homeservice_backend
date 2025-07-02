@@ -1,13 +1,15 @@
-POST http://localhost:5000/api/users
+POST http://localhost:5000/api/register
 Content-Type: application/json
 
 {
   "first_name": "Gift",
   "last_name": "Rethabile",
-  "id_number": "9901011234089",
+  "id_number": "1234567890123",
   "email": "gift@example.com",
   "phone": "0712345678",
   "country": "South Africa",
-  "password": "123456",
+  "region_or_province": "Gauteng",
+  "address": "123 Main Road",
+  "password": "mypassword",
   "role": "homeowner"
 }
