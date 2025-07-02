@@ -1,0 +1,13 @@
+POST http://localhost:5000/api/users
+Content-Type: application/json
+
+{
+  "first_name": "Gift",
+  "last_name": "Rethabile",
+  "id_number": "9901011234089",
+  "email": "gift@example.com",
+  "phone": "0712345678",
+  "country": "South Africa",
+  "password": "123456",
+  "role": "homeowner"
+}
