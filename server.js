@@ -2,32 +2,41 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const fs = require('fs');
+const path = require('path');
 
-
-// Load environment variables
+// 📦 Load environment variables
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// 🧱 Ensure /uploads folder exists
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+  console.log('📂 Created uploads folder');
+}
+
 // 🔧 Middleware
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static(uploadDir)); // Serve uploaded images
 
-// 📦 Routes
+// 📦 Import Routes
 const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./routes/userRoutes'); // Add only if defined
 
-// 🧩 Mount routes
-app.use(authRoutes);              // handles /api/register (and /api/login soon)
-app.use('/api/users', userRoutes); // handles CRUD: /api/users/:id etc.
+// 🧩 Mount Routes
+app.use(authRoutes);                // /api/register, etc.
+app.use('/api/users', userRoutes); // /api/users/:id
 
-// 🌐 Default route
+// 🌐 Root Route
 app.get('/', (req, res) => {
   res.send('🎉 Home Services API running...');
 });
 
-// 🚀 Start server
+// 🚀 Start Server
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
 });
