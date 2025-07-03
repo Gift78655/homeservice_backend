@@ -1,10 +1,20 @@
 const bcrypt = require('bcryptjs');
 const UserModel = require('../models/userModel');
+const nodemailer = require('nodemailer');
 
 // Utility: format ISO to MySQL DATETIME
 const formatMySQLDateTime = (isoString) => {
   return new Date(isoString).toISOString().slice(0, 19).replace('T', ' ');
 };
+
+// Configure email transporter
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASS
+  }
+});
 
 exports.getAllUsers = (req, res) => {
   UserModel.getAll((err, results) => {
@@ -69,7 +79,35 @@ exports.createUser = async (req, res) => {
         console.error('❌ Insert error:', err);
         return res.status(500).json({ message: 'Insert error', error: err });
       }
-      res.status(201).json({ message: 'User created', user_id: result.insertId });
+
+      // 📤 Generate and send OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+      UserModel.updateOTP(result.insertId, otp, otpExpiry, async (err2) => {
+        if (err2) return res.status(500).json({ message: 'Failed to store OTP', error: err2 });
+
+        const subject = "Verify Your Email (OTP)";
+        const html = `<p>Hello ${first_name},</p><p>Your OTP code is: <strong>${otp}</strong></p><p>This code will expire in 10 minutes.</p>`;
+
+        try {
+          await transporter.sendMail({
+            from: `"Home Services" <${process.env.MAIL_USER}>`,
+            to: email,
+            subject,
+            html
+          });
+
+          res.status(200).json({
+            message: 'OTP sent to email. Please verify.',
+            user_id: result.insertId,
+            otp_sent: true
+          });
+        } catch (emailErr) {
+          console.error('❌ Failed to send OTP email:', emailErr);
+          res.status(500).json({ message: 'OTP email failed', error: emailErr });
+        }
+      });
     });
   } catch (err) {
     console.error('❌ Error creating user:', err);

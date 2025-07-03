@@ -93,6 +93,22 @@ const UserModel = {
       }
       callback(null, result);
     });
+  },
+
+  // ✅ New: Update OTP for verification
+  updateOTP: (userId, otp, expiresAt, callback) => {
+    const query = `
+      UPDATE users 
+      SET email_verification_token = ?, email_verification_expires = ?
+      WHERE user_id = ?
+    `;
+    db.query(query, [otp, expiresAt, userId], (err, result) => {
+      if (err) {
+        console.error('[DB Error] updateOTP:', err);
+        return callback(err);
+      }
+      callback(null, result);
+    });
   }
 };
 

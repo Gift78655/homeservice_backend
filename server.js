@@ -25,11 +25,11 @@ app.use('/uploads', express.static(uploadDir)); // Serve uploaded images
 
 // 📦 Import Routes
 const authRoutes = require('./routes/authRoutes');
-const userRoutes = require('./routes/userRoutes'); // Add only if defined
+const userRoutes = require('./routes/userRoutes'); // Optional but must exist if included
 
 // 🧩 Mount Routes
-app.use(authRoutes);                // /api/register, etc.
-app.use('/api/users', userRoutes); // /api/users/:id
+app.use(authRoutes);                // Handles /api/register, /api/verify-otp, etc.
+app.use('/api/users', userRoutes); // Handles /api/users/:id, etc.
 
 // 🌐 Root Route
 app.get('/', (req, res) => {
